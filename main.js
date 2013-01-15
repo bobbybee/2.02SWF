@@ -10,10 +10,19 @@ function SpaceAlt(str){
     return str.replace(" ","sp");
 }
 
+function GenAssetLoadCode(path, prefix){
+    if(typeof(prefix)==='undefined') prefix = "";
+    var retVal = prefix+"var loader:Loader = new Loader();\n"+prefix+"loader.load(new URLRequest(\""+path+"\"));\n";
+    return retVal;
+}
+
 function GenerateSpriteConstructor(sprObj){
      var myID = SpaceAlt(sprObj.objName);
-     var retStr = "                   sprites."+myID+" = new Sprite();\n";
-     retStr += "                   addChild(sprites."+myID+");\n";
+     var retStr = "                   sprites[\""+myID+"\"] = new Sprite();\n";
+     retStr += GenAssetLoadCode("./0.png", "                   ");
+     retStr += "                   sprites[\""+myID+"\"].x = "+(parseInt(sprObj.scratchX)+240)+";\n";
+     retStr += "                   sprites[\""+myID+"\"].y = "+(parseInt(sprObj.scratchY)-180)+";\n";
+     retStr += "                   addChild(sprites[\""+myID+"\"]);\n";
      return retStr;
 }
 
