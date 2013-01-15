@@ -27,7 +27,7 @@ function ComputeAssetName(obj){
 function GenAssetLoadCode(path, spr, prefix){
     if(typeof(prefix)==='undefined') prefix = "";
     loadNum++;
-    var retVal = prefix+"var loader"+loadNum+":Loader = new Loader();\n"+prefix+"loader"+loadNum+".contentLoaderInfo.addEventListener(Event.COMPLETE, function(e:Event){ "+spr+".beginBitmapFill(e.target.content.bitmapData);"+spr+".drawRect(0,0,e.target.content.bitmapData.width,e.taregt.content.bitmapData.height);"+spr+".endFill();});\n"+prefix+"loader"+loadNum+".load(new URLRequest(\""+path+"\"));\n";
+    var retVal = prefix+"var loader"+loadNum+":Loader = new Loader();\n"+prefix+"loader"+loadNum+".contentLoaderInfo.addEventListener(Event.COMPLETE, function(e:Event){ \n"+prefix+"       "+spr+".beginBitmapFill(e.target.content.bitmapData);\n"+prefix+"       "+spr+".drawRect(0,0,e.target.content.bitmapData.width,e.taregt.content.bitmapData.height);\n"+prefix+"       "+spr+".endFill();\n"+prefix+"});\n"+prefix+"loader"+loadNum+".load(new URLRequest(\""+path+"\"));\n";
     return retVal;
 }
 
