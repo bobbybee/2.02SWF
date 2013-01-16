@@ -24,6 +24,19 @@ function ComputeAssetName(obj){
    return retVal;
 }
 
+function PathStringify(path){
+    var ret = path.replace('.','DOT');
+    ret = ret.replace('png','PNG');
+    ret = ret.replace('svg','SVG');
+    ret = ret.replace('wav','WAV');
+    return ret;
+}
+
+function GenAssetEmbedCode(assetName,prefix){
+    if(typeof(prefix)==='undefined') prefix = "";
+    return prefix+"[Embed (source=\""+assetName+"\")]\n"+prefix+"public static const "+PathStringify(assetName)+":Class;\n";
+}
+
 function GenAssetLoadCode(path, spr, prefix){
     if(typeof(prefix)==='undefined') prefix = "";
     loadNum++;
@@ -58,7 +71,17 @@ function GenerateAS3Code(){
     var retVal = "package{\n\
         import flash.display.Sprite;\n\
         \n\
-        public class "+process.argv[2]+" extends Sprite{\n\
+        public class "+process.argv[2]+" extends Sprite{\n";
+    var i = 0;
+    while(i < projJSON.children.length){
+        var j = 0;
+        while(j < projJSON.children[i].costumes.length){
+            retVal += GenAssetEmbedCode(ComputeAssetName(projJSON.children[i].costumes[j]), "                ");
+            ++j;
+        }
+        ++i;
+    }
+    retVal += "\n\
                 public var sprites:Object = new Object();\n\
                 \n\
                 public function "+process.argv[2]+"():void {";
