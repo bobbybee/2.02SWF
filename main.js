@@ -65,8 +65,15 @@ function GenerateSpriteConstructor(sprObj){
      return retStr;
 }
 
+function GenerateBackgroundConstructor(){
+    var retStr = "                   background = new "+PathStringify(ComputeAssetName(projJSON.costumes[projJSON.currentCostumeIndex]))+"();\n";
+    retStr += "                   background.x = 0;\n                   background.y = 0;\n                   addChild(background);\n";
+    return retStr;
+}
+
 function GenerateMainConstructor(){
     var retStr = "\n";
+    retStr += GenerateBackgroundConstructor();
     var i = 0;
     while(i < projJSON.children.length){
         retStr = retStr + GenerateSpriteConstructor(projJSON.children[i]);
@@ -94,7 +101,13 @@ function GenerateAS3Code(){
         }
         ++i;
     }
+    i = 0;
+    while(i < projJSON.costumes.length){
+        retVal += GenAssetEmbedCode(ComputeAssetName(projJSON.costumes[i]), "                ");
+        ++i;
+    }
     retVal += "\n\
+                public var background;\n\
                 public var sprites:Object = new Object();\n\
                 \n\
                 public function "+process.argv[2]+"():void {";
