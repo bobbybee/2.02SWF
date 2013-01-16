@@ -1,6 +1,7 @@
 var fs = require('fs');
 var projJSON = JSON.parse(fs.readFileSync(GetInflatedFile("project.json")).toString());
 var loadNum = -1;
+var scriptNum = -1;
 
 
 console.log(GenerateAS3Code());
@@ -55,6 +56,21 @@ function GenAssetLoadCode(path, spr, prefix){
     return retVal;
 }
 
+function GenerateScriptAS3(scr){
+    scriptNum++;
+    var retVal = "                function Script"+parseInt(scriptNum)+"(){\n";
+    var rsrc = scr[2];
+    var i = 0;
+    while(i < rscr.length){
+        switch(rscr[i][0]){ // block name, pretty much
+            case "whenKeyPressed":
+                retVal += "                   ";
+                break;
+        }
+        ++i;
+    }
+}
+
 function GenerateSpriteConstructor(sprObj){
      var myID = SpaceAlt(sprObj.objName);
      var retStr = "                   sprites[\""+myID+"\"] = new "+PathStringify(ComputeAssetName(sprObj.costumes[sprObj.currentCostumeIndex]))+"();\n";
@@ -72,7 +88,7 @@ function GenerateBackgroundConstructor(){
 }
 
 function GenerateMainConstructor(){
-    var retStr = "\n";
+    var retStr = "\n                   stage.addEventListener(KeyboardEvent.KEY_DOWN, KeyDownHandler);\n";
     retStr += GenerateBackgroundConstructor();
     var i = 0;
     while(i < projJSON.children.length){
@@ -88,6 +104,8 @@ function GenerateAS3Code(){
    // return "package{\n  import flash.display.Sprite;\n\n    public class "+process.argv[2]+" extends Sprite{\n      //variables here\n\n        public function "+process.argv[2]+"():void {\n          //stuff\n       }\n     }\n}";
     var retVal = "package{\n\
         import flash.display.Sprite;\n\
+        import flash.events.Event;\n\
+        import flash.events.KeyboardEvent;\n\
         \n\
         [SWF(width='480', height='360', backgroundColor='#ffffff', frameRate='30')]\n\
         \n\
@@ -109,6 +127,10 @@ function GenerateAS3Code(){
     retVal += "\n\
                 public var background;\n\
                 public var sprites:Object = new Object();\n\
+                \n\
+                public function KeyDownHandler(e:KeyboardEvent):void{\n\
+                    trace(\"key pressed\");\n\
+                }\n\
                 \n\
                 public function "+process.argv[2]+"():void {";
     retVal += GenerateMainConstructor();
