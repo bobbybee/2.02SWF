@@ -58,9 +58,23 @@ function GenAssetLoadCode(path, spr, prefix){
     return retVal;
 }
 
-function GenerateScriptAS3(scr,sprID){
+function ReloadCostume(sprID, sprObj, prefix){
+    var retStr = prefix+"sprites[\""+sprID+"\"] = new "+PathStringify(ComputeAssetName(sprObj.costumes[sprObj.currentCostumeIndex]));
+    retStr += prefix+"sprites[\""+sprID+"\"].x = sprites[\""+sprID+"\"].x-spritesData[\""+sprID+"\"].rotationCenterX+240"/*+parseInt((sprObj.scratchX-sprObj.costumes[sprObj.currentCostumeIndex].rotationCenterX)+240)*/+";\n";
+    retStr += prefix+"sprites[\""+sprID+"\"].y = sprites[\""+sprID+"\"].x-spritesData[\""+sprID+"\"].rotationCenterX+240"/*+parseInt((sprObj.scratchY-sprObj.costumes[sprObj.currentCostumeIndex].rotationCenterY)+180)*/+";\n";
+    return retStr;
+}
+
+function NextCostumeCode(sprID, sprObj, prefix){
+   var retVal = prefix+"spritesData[\""+sprID+"\"].costumeNum++;\n"+prefix+"if(spritesData[\""+sprID+"\"].costumeNum == spritesData[\""+sprID+"\"].costumeMax) spritesData[\""+sprID+"\"].costumeNum = 0;\n"+ReloadCostume(sprID, sprObj, prefix);
+   return retVal; 
+}
+
+
+
+function GenerateScriptAS3(scr,sprID,sprObj){
     scriptNum++;
-    var retVal = "                function Script"+parseInt(scriptNum)+"(){\n";
+    var retVal = "                function Script"+parseInt(scriptNum)+"(sprID:String){\n";
     var rscr = scr[2];
     var i = 0;
     while(i < rscr.length){
@@ -69,10 +83,11 @@ function GenerateScriptAS3(scr,sprID){
                 // add keyboard handler
                 var sensedKeyCode = rscr[i][1];
                 if(sensedKeyCode == "space") sensedKeyCode = " ";
-                keyboardHandlerCode += "                    if(e.charCode == (\""+sensedKeyCode+"\").charCodeAt(0)){\n                      Script"+parseInt(scriptNum)+"("+sprID+");\n                    }\n";
+                keyboardHandlerCode += "                    if(e.charCode == (\""+sensedKeyCode+"\").charCodeAt(0)){\n                      Script"+parseInt(scriptNum)+"(\""+sprID+"\");\n                    }\n";
                 break;
             case "nextCostume":
-                retVal += "                    trace(\"I wanna go to the next costume :P\");\n";
+                retVal += NextCostumeCode(sprID,sprObj,"                    ");
+                //retVal += "                    trace(\"I wanna go to the next costume :P\");\n";
                 break;
         }
         ++i;
@@ -87,6 +102,19 @@ function GenerateSpriteConstructor(sprObj){
      //retStr += GenAssetLoadCode(ComputeAssetName(sprObj.costumes[0]),"sprites[\""+myID+"\"]","                   ");
      retStr += "                   sprites[\""+myID+"\"].x = "+(parseInt(sprObj.scratchX)+240-sprObj.costumes[sprObj.currentCostumeIndex].rotationCenterX)+";\n";
      retStr += "                   sprites[\""+myID+"\"].y = "+(parseInt(sprObj.scratchY)+180-sprObj.costumes[sprObj.currentCostumeIndex].rotationCenterY)+";\n";
+     retStr += "                   spritesData[\""+myID+"\"] = new Object();\n";
+     retStr += "                   spritesData[\""+myID+"\"].costumeNum = "+sprObj.currentCostumeIndex+";\n";
+     retStr += "                   spritesData[\""+myID+"\"].costumeMax = "+sprObj.costumes.length+";\n";
+     retStr += "                   spritesData[\""+myID+"\"].rotationCenterX = "+sprObj.costumes[sprObj.currentCostumeIndex].rotationCenterX+";\n";
+     retStr += "                   spritesData[\""+myID+"\"].rotationCenterY = "+sprObj.costumes[sprObj.currentCostumeIndex].rotationCenterY+";\n";
+     retStr += "                   spritesData[\""+myID+"\"].costumes = [";
+     var i = 0;
+     while(i < sprObj.costumes.length){
+        retStr += "\""+PathStringify(ComputeAssetName(sprObj.costumes[i]))+"\",";
+        ++i;
+     }
+     retStr = retStr.slice(0, -1);
+     retStr += "];\n";
      retStr += "                   addChild(sprites[\""+myID+"\"]);\n";
      return retStr;
 }
@@ -138,12 +166,13 @@ function GenerateAS3Code(){
     retVal += "\n\
                 public var background;\n\
                 public var sprites:Object = new Object();\n\
+                public var spritesData:Object = new Object();\n\
                 \n";
     i = 0;
     j = 0;
     while(i < projJSON.children.length){
         while(j < projJSON.children[i].scripts.length){
-             retVal += GenerateScriptAS3(projJSON.children[i].scripts[j]);
+             retVal += GenerateScriptAS3(projJSON.children[i].scripts[j],SpaceAlt(projJSON.children[i].objName),projJSON.children[i]);
              ++j;
         }
         ++i;
