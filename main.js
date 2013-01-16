@@ -29,6 +29,17 @@ function PathStringify(path){
     ret = ret.replace('png','PNG');
     ret = ret.replace('svg','SVG');
     ret = ret.replace('wav','WAV');
+    ret = ret.replace('1','one');
+    ret = ret.replace('2','two');
+    ret = ret.replace('3','three');
+    ret = ret.replace('4','four');
+    ret = ret.replace('5','five');
+    ret = ret.replace('6','six');
+    ret = ret.replace('7','seven');
+    ret = ret.replace('8','eight');
+    ret = ret.replace('9','nine');
+    ret = ret.replace('0','zero');
+
     return ret;
 }
 
@@ -46,10 +57,10 @@ function GenAssetLoadCode(path, spr, prefix){
 
 function GenerateSpriteConstructor(sprObj){
      var myID = SpaceAlt(sprObj.objName);
-     var retStr = "                   sprites[\""+myID+"\"] = new Sprite();\n";
-     retStr += GenAssetLoadCode(ComputeAssetName(sprObj.costumes[0]),"sprites[\""+myID+"\"]","                   ");
-     retStr += "                   sprites[\""+myID+"\"].x = "+(parseInt(sprObj.scratchX)+240)+";\n";
-     retStr += "                   sprites[\""+myID+"\"].y = "+(parseInt(sprObj.scratchY)-180)+";\n";
+     var retStr = "                   sprites[\""+myID+"\"] = new "+PathStringify(ComputeAssetName(sprObj.costumes[sprObj.currentCostumeIndex]))+"();\n";
+     //retStr += GenAssetLoadCode(ComputeAssetName(sprObj.costumes[0]),"sprites[\""+myID+"\"]","                   ");
+     retStr += "                   sprites[\""+myID+"\"].x = "+(parseInt(sprObj.scratchX)+240-sprObj.costumes[sprObj.currentCostumeIndex].rotationCenterX)+";\n";
+     retStr += "                   sprites[\""+myID+"\"].y = "+(parseInt(sprObj.scratchY)+180-sprObj.costumes[sprObj.currentCostumeIndex].rotationCenterY)+";\n";
      retStr += "                   addChild(sprites[\""+myID+"\"]);\n";
      return retStr;
 }
@@ -70,6 +81,8 @@ function GenerateAS3Code(){
    // return "package{\n  import flash.display.Sprite;\n\n    public class "+process.argv[2]+" extends Sprite{\n      //variables here\n\n        public function "+process.argv[2]+"():void {\n          //stuff\n       }\n     }\n}";
     var retVal = "package{\n\
         import flash.display.Sprite;\n\
+        \n\
+        [SWF(width='480', height='360', backgroundColor='#ffffff', frameRate='30')]\n\
         \n\
         public class "+process.argv[2]+" extends Sprite{\n";
     var i = 0;
