@@ -3,8 +3,10 @@ var projJSON = JSON.parse(fs.readFileSync(GetInflatedFile("project.json")).toStr
 var loadNum = -1;
 var scriptNum = -1;
 
+var keyboardHandlerCode = "";
 
-console.log(GenerateAS3Code());
+
+console.log(GenerateAS3Code()); // TO DO: Output this code to an appropiately named file
 
 
 function GetInflatedFile(f){
@@ -56,19 +58,27 @@ function GenAssetLoadCode(path, spr, prefix){
     return retVal;
 }
 
-function GenerateScriptAS3(scr){
+function GenerateScriptAS3(scr,sprID){
     scriptNum++;
     var retVal = "                function Script"+parseInt(scriptNum)+"(){\n";
-    var rsrc = scr[2];
+    var rscr = scr[2];
     var i = 0;
     while(i < rscr.length){
         switch(rscr[i][0]){ // block name, pretty much
             case "whenKeyPressed":
-                retVal += "                   ";
+                // add keyboard handler
+                var sensedKeyCode = rscr[i][1];
+                if(sensedKeyCode == "space") sensedKeyCode = " ";
+                keyboardHandlerCode += "                    if(e.charCode == (\""+sensedKeyCode+"\").charCodeAt(0)){\n                      Script"+parseInt(scriptNum)+"("+sprID+");\n                    }\n";
+                break;
+            case "nextCostume":
+                retVal += "                    trace(\"I wanna go to the next costume :P\");\n";
                 break;
         }
         ++i;
     }
+    retVal += "                }\n";
+    return retVal;
 }
 
 function GenerateSpriteConstructor(sprObj){
@@ -102,6 +112,7 @@ function GenerateMainConstructor(){
 
 function GenerateAS3Code(){
    // return "package{\n  import flash.display.Sprite;\n\n    public class "+process.argv[2]+" extends Sprite{\n      //variables here\n\n        public function "+process.argv[2]+"():void {\n          //stuff\n       }\n     }\n}";
+   
     var retVal = "package{\n\
         import flash.display.Sprite;\n\
         import flash.events.Event;\n\
@@ -127,9 +138,20 @@ function GenerateAS3Code(){
     retVal += "\n\
                 public var background;\n\
                 public var sprites:Object = new Object();\n\
-                \n\
-                public function KeyDownHandler(e:KeyboardEvent):void{\n\
-                    trace(\"key pressed\");\n\
+                \n";
+    i = 0;
+    j = 0;
+    while(i < projJSON.children.length){
+        while(j < projJSON.children[i].scripts.length){
+             retVal += GenerateScriptAS3(projJSON.children[i].scripts[j]);
+             ++j;
+        }
+        ++i;
+    }
+    retVal += "\n\
+                public function KeyDownHandler(e:KeyboardEvent):void{\n";
+    retVal += keyboardHandlerCode;
+    retVal += "\
                 }\n\
                 \n\
                 public function "+process.argv[2]+"():void {";
