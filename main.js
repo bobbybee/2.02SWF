@@ -58,11 +58,17 @@ function GenAssetLoadCode(path, spr, prefix){
     return retVal;
 }
 
+function ReloadPosition(sprID, sprObj, prefix){
+    var retStr = prefix+"sprites[\""+sprID+"\"].x = spritesData[\""+sprID+"\"].vx-spritesData[\""+sprID+"\"].rotationCenterX+240"/*+parseInt((sprObj.scratchX-sprObj.costumes[sprObj.currentCostumeIndex].rotationCenterX)+240)*/+";\n";
+    retStr += prefix+"sprites[\""+sprID+"\"].y = spritesData[\""+sprID+"\"].vy-spritesData[\""+sprID+"\"].rotationCenterY+180"/*+parseInt((sprObj.scratchY-sprObj.costumes[sprObj.currentCostumeIndex].rotationCenterY)+180)*/+";\n";
+    return retStr;
+
+}
+
 function ReloadCostume(sprID, sprObj, prefix){
     var retStr = "";
     retStr += prefix+"sprites[\""+sprID+"\"].removeChildAt(0);\n"+prefix+"sprites[\""+sprID+"\"].addChild(this[\"r_\"+spritesData[\""+sprID+"\"].costumes[spritesData[\""+sprID+"\"].costumeNum]]);\n";
-    retStr += prefix+"sprites[\""+sprID+"\"].x = spritesData[\""+sprID+"\"].vx-spritesData[\""+sprID+"\"].rotationCenterX+240"/*+parseInt((sprObj.scratchX-sprObj.costumes[sprObj.currentCostumeIndex].rotationCenterX)+240)*/+";\n";
-    retStr += prefix+"sprites[\""+sprID+"\"].y = spritesData[\""+sprID+"\"].vy-spritesData[\""+sprID+"\"].rotationCenterY+180"/*+parseInt((sprObj.scratchY-sprObj.costumes[sprObj.currentCostumeIndex].rotationCenterY)+180)*/+";\n";
+    retStr += ReloadPosition(sprID, sprObj, prefix);
     return retStr;
 }
 
