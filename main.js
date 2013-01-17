@@ -48,7 +48,7 @@ function PathStringify(path){
 
 function GenAssetEmbedCode(assetName,prefix){
     if(typeof(prefix)==='undefined') prefix = "";
-    return prefix+"[Embed (source=\""+assetName+"\")]\n"+prefix+"public static const "+PathStringify(assetName)+":Class;\n";
+    return prefix+"[Embed (source=\""+assetName+"\")]\n"+prefix+"public static const "+PathStringify(assetName)+":Class;\n"+prefix+"public var r_"+PathStringify(assetName)+":Sprite = new "+PathStringify(assetName)+"();\n";
 }
 
 function GenAssetLoadCode(path, spr, prefix){
@@ -59,10 +59,10 @@ function GenAssetLoadCode(path, spr, prefix){
 }
 
 function ReloadCostume(sprID, sprObj, prefix){
-    var retStr = "getDefinitionByName(spritesData[\""+sprID+"\"].costumes[spritesData[\""+sprID+"\"].costumeNum])";
-    retStr += prefix+"sprites[\""+sprID+"\"] = new getDefinitionByName(spritesData[\""+sprID+"\"].costumes[spritesData[\""+sprID+"\"].costumeNum]);\n";
-    retStr += prefix+"sprites[\""+sprID+"\"].x = sprites[\""+sprID+"\"].x-spritesData[\""+sprID+"\"].rotationCenterX+240"/*+parseInt((sprObj.scratchX-sprObj.costumes[sprObj.currentCostumeIndex].rotationCenterX)+240)*/+";\n";
-    retStr += prefix+"sprites[\""+sprID+"\"].y = sprites[\""+sprID+"\"].x-spritesData[\""+sprID+"\"].rotationCenterX+240"/*+parseInt((sprObj.scratchY-sprObj.costumes[sprObj.currentCostumeIndex].rotationCenterY)+180)*/+";\n";
+    var retStr = "";
+    retStr += prefix+"sprites[\""+sprID+"\"].removeChildAt(0);\n"+prefix+"sprites[\""+sprID+"\"].addChild(this[\"r_\"+spritesData[\""+sprID+"\"].costumes[spritesData[\""+sprID+"\"].costumeNum]]);\n";
+    retStr += prefix+"sprites[\""+sprID+"\"].x = spritesData[\""+sprID+"\"].vx-spritesData[\""+sprID+"\"].rotationCenterX+240"/*+parseInt((sprObj.scratchX-sprObj.costumes[sprObj.currentCostumeIndex].rotationCenterX)+240)*/+";\n";
+    retStr += prefix+"sprites[\""+sprID+"\"].y = spritesData[\""+sprID+"\"].vy-spritesData[\""+sprID+"\"].rotationCenterY+180"/*+parseInt((sprObj.scratchY-sprObj.costumes[sprObj.currentCostumeIndex].rotationCenterY)+180)*/+";\n";
     return retStr;
 }
 
@@ -99,7 +99,7 @@ function GenerateScriptAS3(scr,sprID,sprObj){
 
 function GenerateSpriteConstructor(sprObj){
      var myID = SpaceAlt(sprObj.objName);
-     var retStr = "                   sprites[\""+myID+"\"] = new "+PathStringify(ComputeAssetName(sprObj.costumes[sprObj.currentCostumeIndex]))+"();\n";
+     var retStr = "                   sprites[\""+myID+"\"] = new MovieClip();\n                   sprites[\""+myID+"\"].addChild(r_"+PathStringify(ComputeAssetName(sprObj.costumes[sprObj.currentCostumeIndex]))+");\n";
      //retStr += GenAssetLoadCode(ComputeAssetName(sprObj.costumes[0]),"sprites[\""+myID+"\"]","                   ");
      retStr += "                   sprites[\""+myID+"\"].x = "+(parseInt(sprObj.scratchX)+240-sprObj.costumes[sprObj.currentCostumeIndex].rotationCenterX)+";\n";
      retStr += "                   sprites[\""+myID+"\"].y = "+(parseInt(sprObj.scratchY)+180-sprObj.costumes[sprObj.currentCostumeIndex].rotationCenterY)+";\n";
@@ -108,6 +108,8 @@ function GenerateSpriteConstructor(sprObj){
      retStr += "                   spritesData[\""+myID+"\"].costumeMax = "+sprObj.costumes.length+";\n";
      retStr += "                   spritesData[\""+myID+"\"].rotationCenterX = "+sprObj.costumes[sprObj.currentCostumeIndex].rotationCenterX+";\n";
      retStr += "                   spritesData[\""+myID+"\"].rotationCenterY = "+sprObj.costumes[sprObj.currentCostumeIndex].rotationCenterY+";\n";
+     retStr += "                   spritesData[\""+myID+"\"].vx = "+sprObj.scratchX+";\n";
+     retStr += "                   spritesData[\""+myID+"\"].vy = "+sprObj.scratchY+";\n";
      retStr += "                   spritesData[\""+myID+"\"].costumes = [";
      var i = 0;
      while(i < sprObj.costumes.length){
@@ -143,10 +145,10 @@ function GenerateAS3Code(){
    // return "package{\n  import flash.display.Sprite;\n\n    public class "+process.argv[2]+" extends Sprite{\n      //variables here\n\n        public function "+process.argv[2]+"():void {\n          //stuff\n       }\n     }\n}";
    
     var retVal = "package{\n\
+        import flash.display.MovieClip;\n\
         import flash.display.Sprite;\n\
         import flash.events.Event;\n\
         import flash.events.KeyboardEvent;\n\
-        import flash.utils.getDefinitionByName;\n\
         \n\
         [SWF(width='480', height='360', backgroundColor='#ffffff', frameRate='30')]\n\
         \n\
