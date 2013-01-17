@@ -59,7 +59,8 @@ function GenAssetLoadCode(path, spr, prefix){
 }
 
 function ReloadCostume(sprID, sprObj, prefix){
-    var retStr = prefix+"sprites[\""+sprID+"\"] = new "+PathStringify(ComputeAssetName(sprObj.costumes[sprObj.currentCostumeIndex]));
+    var retStr = "getDefinitionByName(spritesData[\""+sprID+"\"].costumes[spritesData[\""+sprID+"\"].costumeNum])";
+    retStr += prefix+"sprites[\""+sprID+"\"] = new getDefinitionByName(spritesData[\""+sprID+"\"].costumes[spritesData[\""+sprID+"\"].costumeNum]);\n";
     retStr += prefix+"sprites[\""+sprID+"\"].x = sprites[\""+sprID+"\"].x-spritesData[\""+sprID+"\"].rotationCenterX+240"/*+parseInt((sprObj.scratchX-sprObj.costumes[sprObj.currentCostumeIndex].rotationCenterX)+240)*/+";\n";
     retStr += prefix+"sprites[\""+sprID+"\"].y = sprites[\""+sprID+"\"].x-spritesData[\""+sprID+"\"].rotationCenterX+240"/*+parseInt((sprObj.scratchY-sprObj.costumes[sprObj.currentCostumeIndex].rotationCenterY)+180)*/+";\n";
     return retStr;
@@ -145,6 +146,7 @@ function GenerateAS3Code(){
         import flash.display.Sprite;\n\
         import flash.events.Event;\n\
         import flash.events.KeyboardEvent;\n\
+        import flash.utils.getDefinitionByName;\n\
         \n\
         [SWF(width='480', height='360', backgroundColor='#ffffff', frameRate='30')]\n\
         \n\
