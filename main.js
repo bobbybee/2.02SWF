@@ -77,6 +77,24 @@ function NextCostumeCode(sprID, sprObj, prefix){
    return retVal; 
 }
 
+function HandleSpecialKey(key, num, sprID, prefix){
+    var kcode = 0;
+    switch(key){
+        case "left arrow":
+            kcode = 37;
+            break;
+        case "right arrow":
+            kcode = 39;
+            break;
+        case "up arrow":
+            kcode = 38;
+            break;
+        case "down arrow":
+            kcode = 40;
+            break;            
+    }
+    return prefix+"if(e.keyCode == "+parseInt(kcode)+"){  Script"+parseInt(num)+"(\""+sprID+"\"); }\n";
+}
 
 
 function GenerateScriptAS3(scr,sprID,sprObj){
@@ -90,12 +108,26 @@ function GenerateScriptAS3(scr,sprID,sprObj){
                 // add keyboard handler
                 var sensedKeyCode = rscr[i][1];
                 if(sensedKeyCode == "space") sensedKeyCode = " ";
-                keyboardHandlerCode += "                    if(e.charCode == (\""+sensedKeyCode+"\").charCodeAt(0)){\n                      Script"+parseInt(scriptNum)+"(\""+sprID+"\");\n                    }\n";
+                if(sensedKeyCode.length > 1)
+                    keyboardHandlerCode += HandleSpecialKey(sensedKeyCode, scriptNum, sprID,"                    ");
+                else
+                    keyboardHandlerCode += "                    if(e.charCode == (\""+sensedKeyCode+"\").charCodeAt(0)){\n                      Script"+parseInt(scriptNum)+"(\""+sprID+"\");\n                    }\n";
                 break;
             case "nextCostume":
                 retVal += NextCostumeCode(sprID,sprObj,"                    ");
                 //retVal += "                    trace(\"I wanna go to the next costume :P\");\n";
                 break;
+            case "changeXposBy:":
+                retVal += "                    spritesData[\""+sprID+"\"].vx += "+rscr[i][1]+";\n";
+                retVal += ReloadPosition(sprID, sprObj, "                    ");
+                break;
+            case "changeYposBy:":
+                retVal += "                    spritesData[\""+sprID+"\"].vy -= "+rscr[i][1]+";\n";
+                retVal += ReloadPosition(sprID, sprObj, "                    ");
+                break;
+
+            default:
+                console.log("Unknown block: "+rscr[i][0]);
         }
         ++i;
     }
